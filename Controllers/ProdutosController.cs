@@ -2,11 +2,13 @@ using System.Data.SqlTypes;
 using System.Threading.Tasks;
 using ApiFuncional.Data;
 using ApiFuncional.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 namespace ApiFuncional.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/produtos")]
 public class ProdutosController : ControllerBase
@@ -18,7 +20,7 @@ public class ProdutosController : ControllerBase
         _context = context;
     }
 
-
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
     {
