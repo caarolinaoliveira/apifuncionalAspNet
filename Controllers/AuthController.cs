@@ -1,4 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using ApiFuncional.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +40,7 @@ public class AuthController : ControllerBase
         {
             // Optionally, you can sign in the user after registration
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return Ok(GerarJwt());
+            return Ok(await GerarJwt(user.Email!));
         }
 
         return Problem("Erro ao registrar usuário: " + string.Join(", ", result.Errors.Select(e => e.Description)));
@@ -53,19 +55,34 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(GerarJwt());
+            return Ok(await GerarJwt(loginUser.Email!));
         }
         return Problem("Usário ou senha inválidos.");
     }
 
-    private string GerarJwt()
+    private async Task<string> GerarJwt(string email)
     {
+        var user = await _userManager.FindByEmailAsync(email);
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        //lista de clains. clain != role, mas em um token tudo é um clain
+        var clains = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.UserName)
+        };
+
+        foreach (var role in roles)
+        {
+            clains.Add(new Claim(ClaimTypes.Role, role));
+        }
+
         var tokenHandler = new JwtSecurityTokenHandler();
 
         var key = System.Text.Encoding.ASCII.GetBytes(_jwtSettings.Segredo ?? string.Empty);
         var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
         {
-
+            Subject = new ClaimsIdentity(clains),
             Issuer = _jwtSettings.Emissor,
             Audience = _jwtSettings.Audiencia,
             Expires = DateTime.UtcNow.AddHours(double.Parse(_jwtSettings.ExpiracaoHoras ?? "1")),
