@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 
 namespace apiFuncional.Configuration
 {
+    //usamos o extension class
     public static class ApiConfig
     {
         public static WebApplicationBuilder AddApiConfig(this WebApplicationBuilder builder)
