@@ -17,6 +17,23 @@ builder.Services.AddControllers()
     {
         options.SuppressModelStateInvalidFilter = true;
     });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Development", builder =>
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+    );
+    options.AddPolicy("Production", builder =>
+            builder
+                .WithOrigins("http://localhost:9000")
+                .WithMethods("POST")
+                .AllowAnyHeader()
+        );
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( c =>
@@ -88,6 +105,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("Development");
+} else 
+{ 
+    app.UseCors("Production");
 }
 
 app.UseHttpsRedirection();

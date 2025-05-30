@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ApiFuncional.Data;
 using ApiFuncional.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -32,7 +33,12 @@ public class ProdutosController : ControllerBase
         return await _context.Produtos.ToListAsync();
     }
 
+    [AllowAnonymous]
+    [EnableCors("Development")]
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<Produto>> GetProdutoById(int id)
     {
         if (_context.Produtos == null)
